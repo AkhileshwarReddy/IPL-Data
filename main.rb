@@ -57,6 +57,7 @@ end
 
 matches_data = SmarterCSV.process("./data/matches.csv")
 deliveries_data = SmarterCSV.process("./data/deliveries.csv")
+sleep(5)
 v = Visualize.new(matches_data, deliveries_data)
 v.plot_matches_played_per_year("Mumbai Indians")
 v.plot_matches_won_by_all_teams()

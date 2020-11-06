@@ -74,7 +74,7 @@ class IPLDataAnalyzer
 
 			# Bowlers economy rate = runs conceded/overs
 
-			bowlers = (year_deliveries.map {|delivery| delivery[:bowler]}).to_set.to_a
+			bowlers = (year_deliveries.map {|delivery| delivery[:bowler]}).to_set.to_a[0..10]
 			bowlers_economy = Hash[bowlers.product([0])]
 			bowlers.each do |bowler|
 				bowler_deliveries = year_deliveries.select {|delivery| delivery[:bowler] == bowler}
