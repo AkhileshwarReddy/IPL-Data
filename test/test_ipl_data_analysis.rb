@@ -1,9 +1,14 @@
-require_relative("../ipl_data_analysis.rb")
+require_relative("../src/ipl_data_analysis.rb")
 require 'test/unit'
 
 class TestIPLDataAnalyzer < Test::Unit::Testcase
+
+    def initialize
+        @ipl_data_analyzer = IPLDataAnalyzer.new("../data/test/matches.csv", "../data/test/deliveries.csv")
+    end
+
     def test_matches_played_per_year
-        
+
     end
 
     def test_matches_won_by_all_teams_over_all_years

@@ -1,17 +1,21 @@
 require 'smarter_csv'
 
 class IPLDataAnalyzer
-	attr_reader :matches_file, :deliveries_file, :matches_data, :deliveries_data, :seasons, :teams
+	attr_accessor :matches_file, :deliveries_file, :matches_data, :deliveries_data, :seasons, :teams
 
-	def initialize(matches_file , deliveries_file)
+	def initialize(matches , deliveries)
 		begin
-			@matches_data = SmarterCSV.process(matches_file)
-			@deliveries_data = SmarterCSV.process(deliveries_file)
-			@seasons = (@matches_data.map { |match| match[:season] }).to_set.sort
-			@teams = (@matches_data.map {|match| match[:team1]}).to_set.to_a
+			@matches_data = matches
+			@deliveries_data = deliveries
+			set_seasons_and_teams()
 		rescue StandardError => ex
 			puts ex.message
 		end
+	end
+
+	def set_seasons_and_teams
+		@seasons = (@matches_data.map { |match| match[:season] }).to_set.sort
+		@teams = (@matches_data.map {|match| match[:team1]}).to_set.to_a
 	end
 
 	def matches_played_per_year(team)
@@ -33,9 +37,12 @@ class IPLDataAnalyzer
 		# 	total_matches_hash[match[:winner]] += 1 if match[:winner] != nil
 		# end
 		begin
-			total_matches_hash = Hash[@teams.product([0])]
+			total_matches_hash = {}
 			teams.each do |team|
-				total_matches_hash[team] = (@matches_data.select {|match| match[:winner] == team}).size
+				total_matches_hash[team] = []
+				@seasons.each do |season|
+					total_matches_hash[team].push((@matches_data.select {|match| match[:winner] == team and match[:season] == season }).size)
+				end
 			end
 			return total_matches_hash
 		rescue StandardError => ex
@@ -43,12 +50,12 @@ class IPLDataAnalyzer
 		end
 	end
 
-	def extra_run_conceded_per_team_by_year(year)
+	def extra_run_conceded_per_team_by_season(year)
 		begin
 			extra_runs_per_team = Hash[@teams.product([0])]
 			year_matches = @matches_data.select {|match| match[:season] == year}
 			@teams.each do |team|
-				extra_runs_per_team[team] = year_matches.inject(0) {|extra_runs, match| extra_runs += match[:win_by_runs]}
+				extra_runs_per_team[team] = (year_matches.select {|match| match[:winner] == team}).inject(0) {|extra_runs, match| extra_runs += match[:win_by_runs]}
 			end
 			return extra_runs_per_team
 		rescue StandardError => ex
@@ -57,12 +64,12 @@ class IPLDataAnalyzer
 		
 	end
 
-	def  top_economical_bowlers_per_year(year)
+	def  top_economical_bowlers_per_season(year)
 		begin
-			match_ids = @matches_data.select {|match| match[:season] == year}
+			matches = @matches_data.select {|match| match[:season] == year}
 			year_deliveries = Array.new
-			match_ids.each do |match_id|
-				year_deliveries += @deliveries_data.select {|delivery| delivery[:match_id] == match_id}
+			matches.each do |match|
+				year_deliveries += @deliveries_data.select {|delivery| delivery[:match_id] == match[:id]}
 			end
 
 			# Bowlers economy rate = runs conceded/overs
@@ -75,7 +82,7 @@ class IPLDataAnalyzer
 				overs = (bowler_deliveries.size/6.0).round(1)
 				bowlers_economy[bowler] = (runs/overs).round(1)
 			end
-			return bowlers_economy
+			return bowlers_economy.sort.reverse
 		rescue StandardError => ex
 			puts ex.message
 		end
