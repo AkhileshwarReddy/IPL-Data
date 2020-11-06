@@ -1,5 +1,3 @@
-require 'smarter_csv'
-
 class IPLDataAnalyzer
 	attr_accessor :matches_file, :deliveries_file, :matches_data, :deliveries_data, :seasons, :teams
 
@@ -52,7 +50,7 @@ class IPLDataAnalyzer
 
 	def extra_run_conceded_per_team_by_season(year)
 		begin
-			extra_runs_per_team = Hash[@teams.product([0])]
+			extra_runs_per_team = {}
 			year_matches = @matches_data.select {|match| match[:season] == year}
 			@teams.each do |team|
 				extra_runs_per_team[team] = (year_matches.select {|match| match[:winner] == team}).inject(0) {|extra_runs, match| extra_runs += match[:win_by_runs]}
@@ -74,7 +72,7 @@ class IPLDataAnalyzer
 
 			# Bowlers economy rate = runs conceded/overs
 
-			bowlers = (year_deliveries.map {|delivery| delivery[:bowler]}).to_set.to_a[0..10]
+			bowlers = (year_deliveries.map {|delivery| delivery[:bowler]}).to_set.to_a
 			bowlers_economy = Hash[bowlers.product([0])]
 			bowlers.each do |bowler|
 				bowler_deliveries = year_deliveries.select {|delivery| delivery[:bowler] == bowler}
@@ -82,7 +80,7 @@ class IPLDataAnalyzer
 				overs = (bowler_deliveries.size/6.0).round(1)
 				bowlers_economy[bowler] = (runs/overs).round(1)
 			end
-			return bowlers_economy.sort.reverse
+			return bowlers_economy.sort_by {|k, v| v}
 		rescue StandardError => ex
 			puts ex.message
 		end
