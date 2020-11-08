@@ -17,7 +17,7 @@ class Visualize
             end
             g.write("img/matches-played-per-season.png") 
         rescue StandardError => ex
-            puts ex.message
+            puts plot_matches_played_per_year, ex.message
         end
     end
 
@@ -32,7 +32,7 @@ class Visualize
             end
             g.write("img/matches-won-by-all-teams-in-all-seasons.png")
         rescue StandardError => ex
-            puts ex.message
+            puts plot_matches_won_by_all_teams, ex.message
         end
     end
 
@@ -46,7 +46,7 @@ class Visualize
             end
             g.write("img/extra-runs-in-#{year}.png")
         rescue StandardError => ex
-            puts ex.message
+            puts plot_extra_runs_conceded_per_season, ex.message
         end
     end
 
@@ -65,8 +65,8 @@ class Visualize
             g.labels = labels
             g.data("Economic bolwer", values)
             g.write("img/top-economical-bowlers-#{year}.png")
-        rescue StandardError => exception
-            puts ex.message
+        rescue StandardError => ex
+            puts plot_top_economical_bowlers_per_season, ex.message
         end
     end
 
@@ -85,7 +85,7 @@ class Visualize
             g.labels= labels
             g.write("img/top-ten-scorers-#{year}.png")
         rescue StandardError=> ex
-            puts ex.message
+            puts plot_top_ten_scorers_of_the_season, ex.message
         end
     end
 

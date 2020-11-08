@@ -12,8 +12,8 @@ class IPLDataAnalyzer
 	end
 
 	def set_seasons_and_teams
-		@seasons = (@matches_data.map { |match| match[:season] }).to_set.sort
-		@teams = (@matches_data.map {|match| match[:team1]}).to_set.to_a
+		@seasons = (@matches_data.map { |match| match[:season] }).uniq.sort
+		@teams = (@matches_data.map {|match| match[:team1]}).uniq
 	end
 
 	def matches_played_per_year
@@ -24,7 +24,7 @@ class IPLDataAnalyzer
 			end
 			return year_wise_matches
 		rescue StandardError => ex
-			puts ex.message			
+			puts matches_played_per_year, ex.message			
 		end
 	end
 
@@ -42,7 +42,7 @@ class IPLDataAnalyzer
 			end
 			return total_matches_hash
 		rescue StandardError => ex
-			puts ex.message
+			puts matches_won_by_all_teams_over_all_years, ex.message
 		end
 	end
 
@@ -57,7 +57,7 @@ class IPLDataAnalyzer
 			end
 			return extra_runs_per_team
 		rescue StandardError => ex
-			puts ex.message
+			puts "extra_run_conceded_per_team_by_season", ex.message
 		end
 		
 	end
@@ -68,31 +68,35 @@ class IPLDataAnalyzer
 
 			# Bowlers economy rate = runs conceded/overs
 
-			bowlers = (year_deliveries.map {|delivery| delivery[:bowler]}).to_set.to_a
+			bowlers = (year_deliveries.map {|delivery| delivery[:bowler]}).uniq
 			bowlers_economy = Hash[bowlers.product([0])]
 			bowlers.each do |bowler|
 				bowler_deliveries = year_deliveries.select {|delivery| delivery[:bowler] == bowler and delivery[:is_super_over] == 0 and delivery[:bye_runs] == 0 and delivery[:legbye_runs] == 0}
+				if bowler_deliveries.size == 0
+					bowlers_economy[bowler] = 0.0
+					next
+				end
 				runs = bowler_deliveries.inject(0) {|score, delivery| score += delivery[:total_runs]}
 				overs = (bowler_deliveries.size/6.0).round(2)
 				bowlers_economy[bowler] = (runs/overs).round(2)
 			end
-			return bowlers_economy.sort_by {|k, v| v}
+			return bowlers_economy.sort_by {|k, v| v}.to_a[0..9]
 		rescue StandardError => ex
-			puts ex.message
+			puts top_economical_bowlers_per_season, ex.message
 		end
 	end
 
 	def top_ten_scorers_of_the_season(year)
 		begin
 			year_deliveries = get_deliveries_of_the_season(year)
-			batsmen = year_deliveries.map {|delivery| delivery[:batsman]}.to_set.to_a
+			batsmen = year_deliveries.map {|delivery| delivery[:batsman]}.uniq
 			bs = Hash[batsmen.product([0])]
 			batsmen.each do |batsman|
 				bs[batsman] = year_deliveries.select {|d| d[:batsman] == batsman}.inject(0) {|s, d| s += d[:total_runs] - d[:extra_runs]}
 			end
 			return bs.sort_by {|k, v| -v}.to_a[0..9].to_h
 		rescue StandardError => ex
-			puts ex.message
+			puts top_ten_scorers_of_the_season, ex.message
 		end
 	end
 

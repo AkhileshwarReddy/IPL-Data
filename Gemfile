@@ -9,4 +9,5 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 gem 'rmagick'
 gem 'gruff'
 gem 'smarter_csv', '~> 1.2', '>= 1.2.6'
-
+gem 'minitest'
+gem "solargraph"
