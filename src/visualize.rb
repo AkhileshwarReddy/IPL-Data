@@ -12,9 +12,15 @@ class Visualize
             seasonal_data = @ipl_data_analyzer.matches_played_per_year
             g = get_basic_graph(Gruff::Bar)
             g.title = "Matches played by season"
-            seasonal_data.each do |key, value|
-                g.data(key, value)
+            labels = {}
+            values = []
+            g.hide_legend = true
+            seasonal_data.to_a.each_with_index do |season, index|
+                labels[index] = season[0]
+                values << season[1] 
             end
+            g.data("", values)
+            g.labels = labels
             g.write("img/matches-played-per-season.png") 
         rescue StandardError => ex
             puts plot_matches_played_per_year, ex.message
@@ -30,6 +36,11 @@ class Visualize
                 k = team.split(' ').inject("") {|a,b| a << b[0]}
                 g.data(k, value)
             end
+            labels = {}
+            @ipl_data_analyzer.seasons.each_with_index do |season, index|
+                labels[index] = season
+            end
+            g.labels = labels
             g.write("img/matches-won-by-all-teams-in-all-seasons.png")
         rescue StandardError => ex
             puts plot_matches_won_by_all_teams, ex.message
@@ -41,9 +52,15 @@ class Visualize
             data = @ipl_data_analyzer.extra_run_conceded_per_team_by_season(year).to_a
             g = get_basic_graph(Gruff::Bar)
             g.title = "Extra runs conceded by all teams in #{year}"
-            data.each do |d|
-                g.data(d[0].split(' ').inject("") {|a, b| a << b[0]}, d[1])
+            g.hide_legend = true
+            labels = {}
+            values = []
+            data.each_with_index do |d, index|
+                labels[index] = d[0].split(' ').inject("") {|a, b| a << b[0]}
+                values << d[1]
             end
+            g.data("", values)
+            g.labels = labels
             g.write("img/extra-runs-in-#{year}.png")
         rescue StandardError => ex
             puts plot_extra_runs_conceded_per_season, ex.message
